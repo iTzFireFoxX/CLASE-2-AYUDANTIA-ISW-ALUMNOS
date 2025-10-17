@@ -1,19 +1,24 @@
 import "dotenv/config";
 import express from "express";
 import morgan from "morgan";
+import cors from "cors";
 import { connectDB } from "./config/configDb.js";
 import { routerApi } from "./routes/index.routes.js";
 import { createUser } from "./config/initialSetup.js";
-import { HOST,PORT } from "./config/configEnv.js";
-import authRoutes from "./routes/auth.routes.js";
-import profileRoutes from "./routes/profile.routes.js";
-
+import { HOST, PORT } from "./config/configEnv.js";
 
 const app = express();
+
+// 2. Configura las opciones de CORS
+const corsOptions = {
+  origin: 'http://localhost:5173', // El origen de tu frontend
+  credentials: true // Permite el envío de cookies y cabeceras de autorización
+};
+
+app.use(cors(corsOptions)); // 3. Usa el middleware de CORS
 app.use(express.json());
 app.use(morgan("dev"));
-app.use("/auth", authRoutes); 
-app.use("/profile", profileRoutes);
+
 // Ruta principal de bienvenida
 app.get("/", (req, res) => {
   res.send("¡Bienvenido a mi API REST con TypeORM!");

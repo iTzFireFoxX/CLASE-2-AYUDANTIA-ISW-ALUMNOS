@@ -1,4 +1,6 @@
-import { handleSuccess } from "../Handlers/responseHandlers.js";
+import { handleSuccess, handleErrorClient, handleErrorServer } from "../Handlers/responseHandlers.js";
+import { userRepository } from "../services/user.service.js";
+import bcrypt from "bcrypt";
 
 export function getPublicProfile(req, res) {
   handleSuccess(res, 200, "Perfil público obtenido exitosamente", {
@@ -6,17 +8,25 @@ export function getPublicProfile(req, res) {
   });
 }
 
-export function getPrivateProfile(req, res) {
-  const user = req.user;
+export async function getPrivateProfile(req, res) {
+  try {
+    const userId = req.user.sub; // Obtenemos el ID del token
+    
+    const userFromDb = await userRepository.findOneBy({ id: userId });
 
-  handleSuccess(res, 200, "Perfil privado obtenido exitosamente", {
-    message: `¡Hola, ${user.email}! Este es tu perfil privado. Solo tú puedes verlo.`,
-    userData: user,
-  });
+    if (!userFromDb) {
+      return handleErrorClient(res, 404, "Usuario no encontrado");
+    }
+
+    handleSuccess(res, 200, "Perfil privado obtenido exitosamente", {
+      message: `¡Hola, ${userFromDb.email}! Este es tu perfil privado. Solo tú puedes verlo.`,
+      userData: userFromDb,
+    });
+
+  } catch (error) {
+    handleErrorServer(res, 500, "Error al obtener el perfil", error.message);
+  }
 }
-
-import { userRepository } from "../services/user.service.js";
-import bcrypt from "bcrypt";
 
 export async function updateProfile(req, res) {
   try {

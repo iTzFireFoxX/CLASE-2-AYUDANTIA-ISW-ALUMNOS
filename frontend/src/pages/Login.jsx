@@ -1,15 +1,32 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@context/AuthContext';
+import { login } from '@services/auth.service.js';
+import { showSuccessAlert, showErrorAlert } from '@helpers/sweetAlert.js';
 
 const Login = () => {
     const navigate = useNavigate();
+    const { setUser } = useAuth();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log({ email, password });
-    };    return (
+        try {
+            const response = await login({ email, password });
+            if (response.status === 'Success') {
+                setUser(response.data.user);
+                showSuccessAlert('¡Éxito!', 'Inicio de sesión correcto.');
+                navigate('/home');
+            } else {
+                showErrorAlert('Error de inicio de sesión', response.message || 'Credenciales incorrectas');
+            }
+        } catch (error) {
+            showErrorAlert('Error de Conexión', 'No se pudo conectar con el servidor.');
+        }
+    };
+
+    return (
         <div className="min-h-screen bg-gradient-to-br from-purple-600 via-indigo-600 to-blue-600 flex items-center justify-center p-4">
             <div className="bg-white rounded-2xl shadow-2xl p-8 md:p-12 w-full max-w-md transform transition-all hover:scale-105">
                 <form className="space-y-6" onSubmit={handleSubmit}>
