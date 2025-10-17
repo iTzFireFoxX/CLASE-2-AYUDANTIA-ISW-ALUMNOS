@@ -4,6 +4,7 @@ import Login from '@pages/Login';
 import Home from '@pages/Home';
 import Error404 from '@pages/Error404';
 import Root from '@pages/Root';
+import Register from '@pages/Register';
 import ProtectedRoute from '@components/ProtectedRoute';
 import '@styles/styles.css';
 
@@ -22,8 +23,16 @@ const router = createBrowserRouter([
         element: <Login />
       },
       {
+        path: '/register',
+        element: <Register />
+      },
+      {
         path: '/home',
-        element: <Home />
+        element: (
+          <ProtectedRoute>
+            <Home />
+          </ProtectedRoute>
+        )
       }
     ]
   }
